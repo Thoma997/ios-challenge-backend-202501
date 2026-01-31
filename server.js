@@ -7,6 +7,15 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Minimal access logging
+app.use((req, res, next) => {
+  const start = Date.now();
+  res.on('finish', () => {
+    console.log(`${req.method} ${req.path} ${res.statusCode} ${Date.now() - start}ms`);
+  });
+  next();
+});
+
 const uploadAudio = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 1024 * 1024 * 1024 }, // 1GB limit
@@ -29,9 +38,9 @@ const uploads = new Map();
 
 // Simulate random failures and delays
 const CONFIG = {
-  uploadFailureRate: 0.15,      // 15% chance of upload failure
-  timeoutRate: 0.1,             // 10% chance of timeout on status check
-  processingFailureRate: 0.1,   // 10% chance transcription fails
+  uploadFailureRate: 0.2,      // 20% chance of upload failure
+  timeoutRate: 0.15,             // 15% chance of timeout on status check
+  processingFailureRate: 0.15,   // 15% chance transcription fails
   minProcessingTime: 5000,      // Min 5 seconds to complete
   maxProcessingTime: 20000,     // Max 20 seconds to complete
 };
